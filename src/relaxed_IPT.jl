@@ -1,4 +1,4 @@
-using NLsolve: fixedpoint
+using SparseArrays, LinearMaps, LinearAlgebra
 
 function relaxed_ipt(
     M::Union{Matrix, SparseMatrixCSC, LinearMap},
