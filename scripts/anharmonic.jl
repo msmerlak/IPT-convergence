@@ -1,24 +1,27 @@
-using DrWatson
+using DrWatson, Plots
+
 include(srcdir("hamiltonians.jl"))
-include(srcdir("relaxed_ipt.jl"))
-
-using Plots
-
 H = anharmonic_oscillator(10.; dim = 10_000)
 
 ### standard solvers don't work
 using KrylovKit, Arpack, ArnoldiMethod
-vals, vecs, info = KrylovKit.eigsolve(H, 1, :SR; verbosity = 0, maxiter = 5000);
-vals, vecs = Arpack.eigs(H; nev = 1, which = :SR, maxiter = 1000, tol = 1e-10)
-decomp, history = partialschur(H; nev = 1, which = SR())
-
-### LOBPCG works, but not without a preconditioner
 using IterativeSolvers, Preconditioners
-lobpcg(H, false, 1; maxiter = 1000)
-P = DiagonalPreconditioner(H)
-lobpcg(H, false, 1; P = P, maxiter = 10000)
+KrylovKit.eigsolve(H, 1, :SR; verbosity = 0, maxiter = 5000)
+Arpack.eigs(H; nev = 1, which = :SR, maxiter = 5000)
+ArnoldiMethod.partialschur(H; nev = 1, which = SR())
+lobpcg(H, false, 1; maxiter = 5000)
 
-using IterativePerturbationTheory, ArnoldiMethod
+P = DiagonalPreconditioner(H)
+lobpcg(H, false, 1; P = P, maxiter = 5000)
+
+include(srcdir("davidson_herbst.jl"))
+davidson(H, H[:, 1:20])
+
+#### IPT
+
+using IterativePerturbationTheory
+include(srcdir("relaxed_ipt.jl"))
+
 plot(
     yaxis = :log, 
     xlabel = "iteration",
@@ -64,7 +67,3 @@ heatmap(
 savefig(plotsdir("anharmonic_strong_convergence"))
 
 
-### davidson
-include(srcdir("davidson_herbst.jl"))
-anharmonic_oscillator(.001; dim = 1_000)
-davidson(H, H[:, 1:5])
