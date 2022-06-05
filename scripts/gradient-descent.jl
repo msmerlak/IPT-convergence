@@ -17,7 +17,7 @@ end
 
 include(srcdir("hamiltonians.jl"))
 
-H = anharmonic_oscillator(10., dim = 100, order = 6) 
+H = anharmonic_oscillator(10., dim = 100, order = 8) 
 p = Dict(:H => H)
 X₀ = Matrix{Float64}(I, size(H, 1), 1)
 
@@ -34,5 +34,9 @@ E₀ = minimum(eigen(Matrix(H)).values)
 plot(
     sol.t, 
     [ρ(H, x) - E₀ for x in sol.u];
-    yaxis = :log
+    yaxis = :log,
+    xlabel = "t",
+    ylabel = "ρ(xₜ) - E₀",
+    label = false,
+    title = "preconditioned gradient descent (continuous time)"
 )
