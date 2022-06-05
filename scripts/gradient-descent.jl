@@ -17,7 +17,7 @@ end
 
 include(srcdir("hamiltonians.jl"))
 
-H = anharmonic_oscillator(1., dim = 50, order = 6) 
+H = anharmonic_oscillator(10., dim = 100, order = 6) 
 p = Dict(:H => H)
 X₀ = Matrix{Float64}(I, size(H, 1), 1)
 
@@ -27,7 +27,7 @@ pb = ODEProblem(
     callback = TerminateSteadyState()
 )
 
-sol = solve(pb)
+sol = solve(pb, Tsit5())
 
 E₀ = minimum(eigen(Matrix(H)).values)
 
